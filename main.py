@@ -99,6 +99,8 @@ if os.path.exists("/home/vadsuhanc"):
 DB_PATH = "./data/boardgames.db" if not RUNNING_ON_PYTHONANYWHERE else "/home/vadsuhanc/repos/bgg_stealer/data/boardgames.db"
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
+print(">>> DB_PATH =", DB_PATH)
+print(">>> DATABASE_URL =", DATABASE_URL)
 
 engine = create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
