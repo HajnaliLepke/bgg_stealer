@@ -1,0 +1,168 @@
+{% extends "base.html" %} {% block title %}Board Games{% endblock %} {% block
+content %}
+
+{% if current_user %}
+<div class="top-dialog">
+    <p>
+        Current user: <strong>{{ current_user.username }}</strong> (id={{
+            current_user.id }})
+        </p>
+        {% else %}
+        <p>No user found in DB (yet).</p>
+        {% endif %}
+        
+        {% if owners %}
+        <form method="get" style="margin-bottom: 1rem;">
+            <label for="owner">Owner:</label>
+            <select name="owner" id="owner">
+                <option value="all" {{ "selected" if current_owner == "all" else "" }}>All</option>
+                {% for owner in owners %}
+                <option value="{{ owner }}" {{ "selected" if current_owner == owner else "" }}>
+                    {{ owner }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <label for="game_type" style="margin-left: 1rem;">Game type:</label>
+            <select name="game_type" id="game_type">
+                <option value="all" {{ "selected" if current_game_type == "all" else "" }}>All</option>
+                {% for game_type in game_types %}
+                <option value="{{ game_type }}" {{ "selected" if current_game_type == game_type else "" }}>
+                    {{ game_type }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <label for="user" style="margin-left: 1rem;">User:</label>
+            <select name="user" id="user">
+                {% for u in users %}
+                <option value="{{ u.id }}" {{ "selected" if user == u.id else "" }}>
+                    {{ u.username }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" style="margin-left: 1rem;">Apply</button>
+        </form>
+        {% endif %}
+        
+    </div>
+    <h2>{{current_game_type | capitalize}} Games for {{users|selectattr("id","equalto",user)|first()|attr("username") if users else ""}} from {{owners}}</h2>
+        <table>
+            <thead>
+    <tr>
+      <th>Category Emoji</th>
+      <th hidden>Object ID</th>
+      <th>Name</th>
+      <th>Rank</th>
+      <th>Version</th>
+      <th>Average Weight</th>
+      <th>Minimum Players</th>
+      <th>Maximum Players</th>
+      <th>Owners</th>
+      <th hidden>Item Type</th>
+      <th hidden>Category Number</th>
+      <th>Category</th>
+      <th>New Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for game in games %}
+  <tr
+    class="vote-{{ game.vote_num if game.vote_num is not none else 'none' }}"
+  >
+      <td class="emoji">    {{
+        "🥵" if game.vote_num == 7 else
+        "😍" if game.vote_num in [6, 5] else
+        "😏" if game.vote_num == 4 else
+        "🤮" if game.vote_num in [3, 2] else
+        "🤔"
+    }}</td>
+      <td hidden>{{ game.objectid }}</td>
+      <td class="title">{{ game.objectname }}</td>
+      <td>{{ game.rank }}</td>
+      <td>
+        {{ game.version_yearpublished if game.version_yearpublished else ""}}{{
+        " " ~ game.version_nickname if game.version_nickname else "" }}
+      </td>
+      <td>{{ game.avgweight }}</td>
+      <td>{{ game.minplayers }}</td>
+      <td>{{ game.maxplayers }}</td>
+      <td >{{ game.owners | replace(",",", ") }}</td>
+      <td hidden>{{ game.itemtype }}</td>
+      <td hidden>{{ game.vote_num}}</td>
+      <td>{{ game.vote_str}}</td>
+      <td>
+        {% if current_user %}
+        <form
+          action="/games/{{ game.objectid }}/vote?owner={{current_owner}}&game_type={{current_game_type}}&user={{user}}"
+          method="post"
+          style="display: inline"
+          class="vote-form"
+          data-game-id="{{ game.id }}"
+          {{"disabled" if user != current_user.id else ""}}
+        >
+          <select name="vote_num" id="vote" class="vote-select" 
+          {{"disabled" if user != current_user.id else ""}}>
+            <option value="0" selected disabled hidden>
+              Change your category
+            </option>
+            <optgroup label="🥵">
+                <option value="7">Can't play enough</option>
+            </optgroup>
+            <optgroup label="😍">
+                <option value="6">Want to play again</option>
+                <option value="5">Want to try</option>
+            </optgroup>
+            <optgroup label="😏">
+                <option value="4">Already tried</option>
+            </optgroup>
+            <optgroup label="🤔">
+                <option value="1">Haven't played</option>
+            </optgroup>
+            <optgroup label="🤮">
+                <option value="3">Won't play again</option>
+                <option value="2">Won't try</option>
+            </optgroup>
+          </select>
+          <input type="hidden" name="user_id" value="{{ current_user.id }}" />
+          <button
+            type="submit"
+            name="vote_submitted"
+            value="true"
+            class="vote-button"
+            disabled
+          >
+            ✏️ Change
+          </button>
+        </form>
+        {% else %}
+        <em>No user</em>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} {% block script %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".vote-form").forEach((form) => {
+      const select = form.querySelector(".vote-select");
+      const button = form.querySelector(".vote-button");
+
+      // Disable at start (in case of cached DOM)
+      button.disabled = select.value === "0";
+
+      select.addEventListener("change", () => {
+        if (select.value === "0") {
+          button.disabled = true;
+        } else {
+          button.disabled = false;
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

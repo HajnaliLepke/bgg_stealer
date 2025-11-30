@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Board Games{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Board Game Collections</h1>
+      <div class="login-div">
+        {% if current_user %} Logged in as
+        <strong>{{ current_user.username }}</strong>
+        <a href="/logout">(Logout)</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer>
+      <small>Demo app with FastAPI + Jinja2</small>
+    </footer>
+  </body>
+  {% block script %}{% endblock %}
+</html>

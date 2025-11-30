@@ -1,0 +1,104 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: #fbceb1;
+}
+
+h1 {
+  place-self: center;
+}
+.login-div {
+  place-self: end;
+}
+
+header,
+footer {
+  margin-bottom: 1rem;
+}
+
+.top-dialog {
+  background-color: rgb(255, 127, 80, 0.6);
+  border-radius: 10px;
+  padding-left: 5px;
+  padding-bottom: 1px;
+  padding-top: 1px;
+  width: 800px;
+  place-self: center;
+  align-items: center;
+  justify-items: center;
+  /* box-shadow: ; */
+  /* margin: 2px,1px; */
+}
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+  /* border-color: black; */
+}
+
+th,
+td {
+  border: 1px solid rgb(0, 0, 0, 0.7);
+  padding: 0.4rem 0.6rem;
+}
+
+thead {
+  background-color: rgb(255, 127, 80, 0.6);
+}
+
+/* CORNERS OF TABLE*/
+table thead th:first-child {
+  border-top-left-radius: 32px;
+}
+table thead th:last-child {
+  border-top-right-radius: 32px;
+}
+table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 32px;
+}
+table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 32px;
+}
+
+button {
+  padding: 0.2rem 0.5rem;
+  margin: 0 0.1rem;
+  cursor: pointer;
+}
+
+/* example colors – adjust to taste */
+tr.vote-7 {
+  background-color: rgb(0, 145, 80, 0.6);
+} /* Can't play enough (strong green) */
+tr.vote-6 {
+  background-color: rgb(86, 179, 118, 0.6);
+} /* Want to play again (light green) */
+tr.vote-5 {
+  background-color: rgb(172, 225, 175, 0.6);
+} /* Want to try (blue-ish) */
+tr.vote-4 {
+  background-color: rgb(240, 230, 140, 0.6);
+} /* Already tried (yellow-ish) */
+tr.vote-3 {
+  background-color: rgb(228, 28, 56, 0.6);
+} /* Won't play again (red-ish) */
+tr.vote-2 {
+  background-color: rgb(248, 131, 121, 0.6);
+} /* Won't try (stronger red) */
+tr.vote-1 {
+  background-color: rgb(251, 206, 177, 0.6);
+} /* Haven't played (almost white) */
+tr.vote-0,
+tr.vote-none {
+  background-color: rgba(232, 110, 10, 0.6);
+} /* no category */
+
+td.title {
+  font-weight: bold;
+}
+td.emoji {
+  font-size: xx-large;
+}
