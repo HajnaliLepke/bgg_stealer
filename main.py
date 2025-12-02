@@ -233,8 +233,8 @@ app = FastAPI(title="Board Game Likes (HTML + API)")
 
 templates = Jinja2Templates(directory="templates")
 
-# Optional static directory (CSS, JS, images)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# # Optional static directory (CSS, JS, images)
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # -------------------------
