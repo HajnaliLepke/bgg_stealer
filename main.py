@@ -233,8 +233,9 @@ app = FastAPI(title="Board Game Likes (HTML + API)")
 
 templates = Jinja2Templates(directory="templates")
 
-# # Optional static directory (CSS, JS, images)
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+# Optional static directory (CSS, JS, images)
+static_folder = "/static" if not RUNNING_ON_PYTHONANYWHERE else "/home/vadsuhanc/repos/bgg_stealer/static"
+app.mount(static_folder, StaticFiles(directory="static"), name="static")
 
 
 # -------------------------
