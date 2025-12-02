@@ -54,7 +54,7 @@ def vote_num_to_str(vote_num: int | None) -> str:
     return "Haven't played"
 
 
-df_use_cols = ["objectname", "objectid", "avgweight",
+df_use_cols = ["objectname", "originalname", "objectid", "avgweight",
                "rank", "minplayers", "maxplayers", "version_yearpublished", "version_nickname", "itemtype"]
 
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
@@ -119,6 +119,7 @@ class Game(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     objectid = Column(Integer, index=True, nullable=False)
+    originalname = Column(String, index=True, nullable=False)
     objectname = Column(String, index=True, nullable=False)
     avgweight = Column(Float, nullable=False)
     rank = Column(Integer, nullable=False)
@@ -174,6 +175,7 @@ Base.metadata.create_all(bind=engine)
 
 class GameCreate(BaseModel):
     objectname: str
+    originalname: str
     objectid: int
     avgweight: float
     rank: int
@@ -188,6 +190,7 @@ class GameCreate(BaseModel):
 class GameOut(BaseModel):
     # id: int
     objectname: str
+    originalname: str
     objectid: int
     avgweight: float
     rank: int
@@ -271,7 +274,8 @@ def get_all_games(db: Session, user_id: int) -> List[GameOut]:
     query = (
         db.query(
             Game.objectid.label("objectid"),
-            Game.objectname.label("objectname"),
+            Game.originalname.label("originalname"),
+            func.max(Game.objectname).label("objectname"),
             func.max(Game.avgweight).label("avgweight"),
             func.max(Game.minplayers).label("minplayers"),
             func.max(Game.maxplayers).label("maxplayers"),
@@ -297,7 +301,7 @@ def get_all_games(db: Session, user_id: int) -> List[GameOut]:
             User.id == Vote.user_id,
         ).group_by(
             Game.objectid,
-            Game.objectname,
+            Game.originalname,
             User.username,   # may be None if no vote
             Vote.vote_num,   # may be None if no vote
         )
@@ -316,12 +320,13 @@ def get_all_games(db: Session, user_id: int) -> List[GameOut]:
     rows = query.all()
 
     result: List[GameOut] = []
-    for objectid, objectname, avgweight, minplayers, maxplayers, rank, version_yearpublished, version_nickname, itemtype, username, vote_num, owners in rows:
+    for objectid, originalname, objectname, avgweight, minplayers, maxplayers, rank, version_yearpublished, version_nickname, itemtype, username, vote_num, owners in rows:
         # print(f"{objectid}: {objectname} -> {owners}")
         # print(objectid, objectname, avgweight, minplayers, maxplayers, rank,
         #       version_yearpublished, version_nickname, itemtype, username, vote_num, owners)
         result.append(
             GameOut(
+                originalname=originalname,
                 objectname=objectname,
                 objectid=objectid,
                 avgweight=avgweight,
@@ -359,22 +364,19 @@ def seed_demo_data(db: Session):
     if not db.query(Game).first():
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         DATA_DIR = os.path.join(BASE_DIR, "data")
-        csv1 = os.path.join(DATA_DIR, "collection_jatszohazprojekt.csv")
-        csv2 = os.path.join(DATA_DIR, "collection_Boardgamebudapest.csv")
-        csv3 = os.path.join(DATA_DIR, "collection_jatszma_kavezo.csv")
 
-        df = pd.read_csv(csv1,
-                         usecols=df_use_cols)
-        df["owner"] = "jatszohazprojekt"
+        owners = ["jatszohazprojekt", "Boardgamebudapest",
+                  "jatszma_kavezo", "gemklub_corvin"]
+        dfs = []
+        for o in owners:
+            csv = os.path.join(DATA_DIR, f"collection_{o}.csv")
 
-        df2 = pd.read_csv(csv2,
-                          usecols=df_use_cols)
-        df2["owner"] = "Boardgamebudapest"
-        df3 = pd.read_csv(csv3,
-                          usecols=df_use_cols)
-        df3["owner"] = "jatszma_kavezo"
+            df = pd.read_csv(csv,
+                             usecols=df_use_cols)
+            df["owner"] = o
+            dfs.append(df)
 
-        df_concated = pd.concat([df, df2, df3]).drop_duplicates(
+        df_concated = pd.concat(dfs).drop_duplicates(
             subset=["owner", "objectid"])
 
         df_concated["version_yearpublished"] = pd.to_numeric(
@@ -395,6 +397,7 @@ def seed_demo_data(db: Session):
 
             game = Game(
                 objectname=row["objectname"],
+                originalname=row["originalname"],
 
                 minplayers=row.get("minplayers"),
                 maxplayers=row.get("maxplayers"),
